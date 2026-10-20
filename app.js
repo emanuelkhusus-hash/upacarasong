@@ -1,3 +1,30 @@
+
+function decodeGitHubBase64(base64Str) {
+  if (!base64Str) return '';
+  const cleanBase64 = base64Str.replace(/\s+/g, '');
+  const binaryString = atob(cleanBase64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  const decoder = new TextDecoder('utf-8');
+  let text = decoder.decode(bytes);
+  if (text.charCodeAt(0) === 0xFEFF) {
+    text = text.substring(1);
+  }
+  return text;
+}
+
+function encodeGitHubBase64(str) {
+  const encoder = new TextEncoder();
+  const bytes = encoder.encode(str);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
 ﻿/**
  * app.js - Logika Portal Pengelola & Upload Lagu (Upacara Song Repository)
  * Mendukung GitHub REST API, File System Access API, Audio Preview, & Manajemen Katalog
@@ -480,7 +507,7 @@ async function publishToGitHub() {
       const catalogData = await getCatalogRes.json();
       catalogSha = catalogData.sha;
       try {
-        const decodedContent = decodeURIComponent(escape(atob(catalogData.content)));
+        const decodedContent = decodeGitHubBase64(catalogData.content);
         catalogJson = JSON.parse(decodedContent);
       } catch (e) {
         console.warn('Gagal decode songs.json dari GitHub, menggunakan fallback');
@@ -507,7 +534,7 @@ async function publishToGitHub() {
 
     // Encode updated songs.json ke Base64
     const updatedJsonString = JSON.stringify(catalogJson, null, 2);
-    const base64Catalog = btoa(unescape(encodeURIComponent(updatedJsonString)));
+    const base64Catalog = encodeGitHubBase64(updatedJsonString);
 
     // 4. Commit songs.json kembali ke GitHub
     const putCatalogRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/songs.json`, {
@@ -676,11 +703,11 @@ async function removeSongFromCatalog(id, title) {
       });
       if (getCatalogRes.ok) {
         const data = await getCatalogRes.json();
-        const catalogJson = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+        const catalogJson = JSON.parse(decodeGitHubBase64(data.content));
         catalogJson.songs = (catalogJson.songs || []).filter(s => s.id !== id);
 
         const updatedJsonString = JSON.stringify(catalogJson, null, 2);
-        const base64Catalog = btoa(unescape(encodeURIComponent(updatedJsonString)));
+        const base64Catalog = encodeGitHubBase64(updatedJsonString);
 
         await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/songs.json`, {
           method: 'PUT',
