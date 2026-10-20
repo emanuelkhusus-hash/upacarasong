@@ -1,107 +1,15 @@
-﻿{
-    "repository":  "Upacara Song Repository",
-    "version":  "1.0.0",
-    "description":  "Katalog Lagu Upacara Bendera \u0026 Koor untuk Upacara Player",
-    "songs":  [
-                  {
-                      "id":  "indonesia_raya_mid",
-                      "title":  "INDONESIA (Indonesia Raya)",
-                      "category":  "Upacara Wajib",
-                      "driveId":  "1GzhQgSSW0gX7nrpRyWUVHSFCjr6ZiVxl",
-                      "directUrl":  "audio/indonesia_raya.mid",
-                      "isMidi":  true,
-                      "description":  "Lagu Kebangsaan Indonesia Raya (Format MIDI Upacara)"
-                  },
-                  {
-                      "id":  "mengheningkan_cipta_mid",
-                      "title":  "MENGHENINGKAN CIPTA",
-                      "category":  "Upacara Wajib",
-                      "driveId":  "1ZkkGoMDzn1voX60eZ5S08lONcaxPnQv3",
-                      "directUrl":  "audio/mengheningkan_cipta.mid",
-                      "isMidi":  true,
-                      "description":  "Mengheningkan Cipta dipimpin Pembina Upacara (Format MIDI)"
-                  },
-                  {
-                      "id":  "padamu_negeri_mp3",
-                      "title":  "Padamu Negeri (Bagimu Negeri)",
-                      "category":  "Lagu Nasional",
-                      "driveId":  "1lmQqPj1pVCfFILTF2a4TpSbNCKmIkaS4",
-                      "directUrl":  "audio/padamu_negeri.mp3",
-                      "isMidi":  false,
-                      "description":  "Lagu Wajib Nasional ciptaan Kusbini"
-                  },
-                  {
-                      "id":  "tanah_airku_mp3",
-                      "title":  "TANAH AIRKU",
-                      "category":  "Lagu Nasional",
-                      "driveId":  "12Kb_nYasO5wCfToB4sIEjsdbyRaiQMKz",
-                      "directUrl":  "audio/tanah_airku.mp3",
-                      "isMidi":  false,
-                      "description":  "Lagu Wajib Nasional ciptaan Ibu Soed"
-                  },
-                  {
-                      "id":  "syukur_mp3",
-                      "title":  "Syukur",
-                      "category":  "Lagu Nasional",
-                      "driveId":  "1nU0jAfE-m2OboQBR0Bo9e71GMmjPqwoh",
-                      "directUrl":  "audio/syukur.mp3",
-                      "isMidi":  false,
-                      "description":  "Lagu Wajib ciptaan H. Mutahar"
-                  },
-                  {
-                      "id":  "ibu_kita_kartini_mp3",
-                      "title":  "Ibu Kita Kartini - Karaoke",
-                      "category":  "Lagu Nasional",
-                      "driveId":  "14X-ofW5mw7ebGJZCSSKZNFPgRi5IYCpN",
-                      "directUrl":  "audio/ibu_kita_kartini.mp3",
-                      "isMidi":  false,
-                      "description":  "Lagu Nasional ciptaan W.R. Soepratman (Versi Karaoke / Koor)"
-                  },
-                  {
-                      "id":  "hymne_pramuka_mp3",
-                      "title":  "Hymne Pramuka - Karaoke",
-                      "category":  "Hymne \u0026 Mars",
-                      "driveId":  "12fKlpN41RezTlnr4-WjNsBFO14nnjzvb",
-                      "directUrl":  "audio/hymne_pramuka.mp3",
-                      "isMidi":  false,
-                      "description":  "Hymne Pramuka ciptaan H. Mutahar untuk upacara kepanduan/pramuka"
-                  },
-                  {
-                      "id":  "mars_kenshiro_mp3",
-                      "title":  "Mars Kenshiro [Versi Karaoke]",
-                      "category":  "Hymne \u0026 Mars",
-                      "driveId":  "177vTzUqU7dpkSRoUkjOi_FlNN00t4kZd",
-                      "directUrl":  "audio/mars_kenshiro.mp3",
-                      "isMidi":  false,
-                      "description":  "Mars pengiring upacara dan defile"
-                  },
-                  {
-                      "id":  "pemanasan_mid",
-                      "title":  "PEMANASAN (Vocal Vocalizing)",
-                      "category":  "Pemanasan Vokal",
-                      "driveId":  "1pxCQXpWQpkC6QqHSNzPtUh_57DvWFleP",
-                      "directUrl":  "audio/pemanasan.mid",
-                      "isMidi":  true,
-                      "description":  "Tangga nada pemanasan suara sebelum bertugas koor upacara"
-                  },
-                  {
-                      "id":  "rukun_sama_teman_mp3",
-                      "title":  "RUKUN SAMA TEMAN",
-                      "category":  "Lagu Pilihan",
-                      "driveId":  "1YnYv-3piaPfECLOEbaCzUTTkbkhbfbL5",
-                      "directUrl":  "audio/rukun_sama_teman.mp3",
-                      "isMidi":  false,
-                      "description":  "Lagu kebersamaan pelajar"
-                  },
-                  {
-                      "id":  "rukun_sama_teman_minusone_mp3",
-                      "title":  "RUKUN SAMA TEMAN (Minus One)",
-                      "category":  "Lagu Pilihan",
-                      "driveId":  "1uzxdkKkBtgjIgwWR7tufbHAwoyd7dwI5",
-                      "directUrl":  "audio/rukun_sama_teman_minusone.mp3",
-                      "isMidi":  false,
-                      "description":  "Versi Minus One instrumen pengiring vokal"
-                  }
-              ],
-    "driveFolderUrl":  "https://drive.google.com/drive/folders/1VjwxTapFmxaN9l35miBbsbg3EuVYARtN?usp=sharing"
+{
+  "repository": "Upacara Song Repository",
+  "version": "1.0.0",
+  "description": "Katalog Lagu Upacara Bendera & Koor untuk Upacara Player",
+  "songs": [
+    {
+      "id": "halo_halo_bandung___karaoke_mp3",
+      "title": "Halo Halo Bandung   Karaoke",
+      "category": "Lagu Nasional",
+      "directUrl": "audio/Halo Halo Bandung - Karaoke.mp3",
+      "isMidi": false,
+      "description": "Lagu pengiring upacara (Halo Halo Bandung   Karaoke)"
+    }
+  ]
 }
