@@ -1,0 +1,289 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Pengelola & Upload Lagu - Upacara Song Repository</title>
+  <meta name="description" content="Portal manajemen dan pengunggahan lagu untuk Upacara Song Repository. Mendukung upload langsung ke GitHub via API dan manajemen folder lokal.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232563EB'><path d='M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="brand-row">
+          <span class="badge-repo">🎵 UPACARA REPOSITORY</span>
+          <span id="syncBadge" class="badge-status disconnected">
+            <span class="status-dot"></span>
+            <span id="syncText">GitHub Belum Terhubung</span>
+          </span>
+        </div>
+        <h1 class="header-title">Portal Pengelola & Upload Lagu</h1>
+        <p class="header-desc">Kelola dan unggah file audio upacara (.mp3 / .mid) secara instan ke repositori GitHub atau komputer lokal.</p>
+      </div>
+
+      <div class="header-actions">
+        <button id="btnReloadRepo" class="btn btn-outline" title="Muat ulang data lagu dari songs.json">
+          <svg viewBox="0 0 24 24" class="btn-icon"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+          <span>Segarkan Data</span>
+        </button>
+        <button id="btnOpenSettings" class="btn btn-primary" title="Konfigurasi Token & Repositori GitHub">
+          <svg viewBox="0 0 24 24" class="btn-icon"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+          <span>Pengaturan GitHub</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- STATS BAR -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <span class="stat-label">Total Lagu</span>
+        <span id="statTotal" class="stat-val">11</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Audio MP3</span>
+        <span id="statMp3" class="stat-val">8</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Audio MIDI</span>
+        <span id="statMidi" class="stat-val">3</span>
+      </div>
+      <div class="stat-card stat-card-link">
+        <span class="stat-label">URL Katalog CDN</span>
+        <div class="cdn-row">
+          <input type="text" id="cdnUrlInput" class="cdn-input" readonly value="songs.json">
+          <button id="btnCopyCdnUrl" class="btn-copy-sm" title="Salin URL CDN untuk Upacara Player">Salin</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN TWO-COLUMN CONTENT -->
+    <main class="main-grid">
+
+      <!-- KOLOM KIRI: FORM UPLOAD LAGU BARU -->
+      <section class="card form-card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <svg viewBox="0 0 24 24" class="card-icon"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+            Unggah Lagu Baru
+          </h2>
+          <span class="card-badge">Formulir Interaktif</span>
+        </div>
+
+        <form id="uploadForm" class="upload-form" onsubmit="return false;">
+          <!-- Dropzone File Audio -->
+          <div class="dropzone" id="audioDropzone">
+            <input type="file" id="fileAudio" accept=".mp3,.mid,.midi,.wav,.ogg" style="display: none;">
+            <div class="dropzone-content" id="dropzoneEmpty">
+              <svg viewBox="0 0 24 24" class="dropzone-icon"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+              <p class="dropzone-title">Klik atau seret file audio kemari</p>
+              <p class="dropzone-sub">Mendukung format: <strong>.MP3, .MID (MIDI), .WAV, .OGG</strong></p>
+            </div>
+            
+            <div class="dropzone-preview" id="dropzonePreview" style="display: none;">
+              <div class="preview-info">
+                <span id="previewName" class="file-name">nama_lagu.mp3</span>
+                <span id="previewMeta" class="file-meta">3.4 MB • MP3</span>
+              </div>
+              <button type="button" id="btnRemoveFile" class="btn-remove-file" title="Ganti file">&times;</button>
+            </div>
+          </div>
+
+          <!-- Pratinjau Pemutar Audio (Jika MP3/WAV/OGG) -->
+          <div id="audioPreviewWrap" class="audio-preview-wrap" style="display: none;">
+            <audio id="audioPreviewPlayer" controls style="width: 100%; height: 38px;"></audio>
+          </div>
+
+          <!-- Input Metadata Lagu -->
+          <div class="form-group">
+            <label for="inputTitle">Judul Lagu <span class="req">*</span></label>
+            <input type="text" id="inputTitle" class="form-input" placeholder="Contoh: Maju Tak Gentar" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-half">
+              <label for="selectCategory">Kategori Lagu <span class="req">*</span></label>
+              <select id="selectCategory" class="form-select" required>
+                <option value="Upacara Wajib">Upacara Wajib</option>
+                <option value="Lagu Nasional" selected>Lagu Nasional</option>
+                <option value="Hymne & Mars">Hymne & Mars</option>
+                <option value="Pemanasan Vokal">Pemanasan Vokal</option>
+                <option value="Lagu Pilihan">Lagu Pilihan</option>
+              </select>
+            </div>
+
+            <div class="form-group col-half">
+              <label for="inputId">ID Unik (Otomatis)</label>
+              <input type="text" id="inputId" class="form-input font-mono" placeholder="id_otomatis_mp3" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="inputDesc">Deskripsi / Keterangan Pencipta</label>
+            <textarea id="inputDesc" class="form-textarea" rows="2" placeholder="Contoh: Lagu Wajib Nasional ciptaan C. Simanjuntak"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="inputDriveId">Google Drive File ID / Link (Opsional sebagai cadangan)</label>
+            <input type="text" id="inputDriveId" class="form-input" placeholder="Contoh: 1A2b3C4d5E6f7G... atau biarkan kosong">
+          </div>
+
+          <!-- Progress upload -->
+          <div id="uploadProgressWrap" class="progress-wrap" style="display: none;">
+            <div class="progress-info">
+              <span id="progressMessage">Mengunggah file ke GitHub...</span>
+              <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress-bar">
+              <div id="progressBarFill" class="progress-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="form-actions">
+            <button type="button" id="btnPublishGitHub" class="btn btn-primary btn-block">
+              <svg viewBox="0 0 24 24" class="btn-icon"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+              <span>Publikasikan ke GitHub (Auto-Commit)</span>
+            </button>
+
+            <div class="alt-actions-row">
+              <button type="button" id="btnSaveLocalFolder" class="btn btn-outline-sm" title="Simpan langsung ke folder audio/ di komputer via Chrome File System">
+                💻 Simpan ke Folder Komputer
+              </button>
+              <button type="button" id="btnExportJson" class="btn btn-outline-sm" title="Download songs.json yang sudah diperbarui">
+                📥 Download songs.json
+              </button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- KOLOM KANAN: DAFTAR LAGU DALAM REPOSITORI -->
+      <section class="card list-card">
+        <div class="card-header">
+          <div class="header-title-wrap">
+            <h2 class="card-title">
+              <svg viewBox="0 0 24 24" class="card-icon"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+              Katalog Lagu Terdaftar
+            </h2>
+            <span class="card-subtitle" id="songCountSubtitle">Memuat katalog...</span>
+          </div>
+        </div>
+
+        <!-- Toolbar Pencarian & Kategori -->
+        <div class="catalog-toolbar">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" class="search-icon"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="text" id="filterSearch" class="search-input" placeholder="Cari judul lagu...">
+          </div>
+          <div class="category-pills" id="categoryFilterPills">
+            <button class="pill active" data-cat="all">Semua</button>
+            <button class="pill" data-cat="Upacara Wajib">Wajib</button>
+            <button class="pill" data-cat="Lagu Nasional">Nasional</button>
+            <button class="pill" data-cat="Hymne & Mars">Hymne/Mars</button>
+            <button class="pill" data-cat="Pemanasan Vokal">Pemanasan</button>
+          </div>
+        </div>
+
+        <!-- List Daftar Lagu -->
+        <div class="songs-table-wrap">
+          <div class="songs-table" id="songsTableContainer">
+            <!-- Render oleh JavaScript -->
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="app-footer">
+      <p><strong>Upacara Song Repository</strong> • Dibangun untuk mengiringi Upacara Player PWA.</p>
+      <div class="footer-links">
+        <button id="btnOpenGuideModal" class="btn-link">Panduan GitHub Token</button>
+        <span>•</span>
+        <a href="https://github.com" target="_blank" rel="noopener" class="btn-link">Buka GitHub.com</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- MODAL: PENGATURAN GITHUB -->
+  <div id="modalSettings" class="modal-backdrop" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">⚙️ Konfigurasi Repositori GitHub</h3>
+        <button id="btnCloseSettings" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-intro">
+          Masukkan token akses GitHub Anda untuk mengizinkan halaman ini mengunggah file audio dan memperbarui <code>songs.json</code> secara otomatis ke repositori.
+        </p>
+
+        <div class="form-group">
+          <label for="cfgOwner">Username GitHub / Organisasi</label>
+          <input type="text" id="cfgOwner" class="form-input" placeholder="Contoh: smkn1giritontro atau username-anda">
+        </div>
+
+        <div class="form-group">
+          <label for="cfgRepo">Nama Repositori</label>
+          <input type="text" id="cfgRepo" class="form-input" placeholder="Contoh: upacara-songs">
+        </div>
+
+        <div class="form-group">
+          <label for="cfgBranch">Branch</label>
+          <input type="text" id="cfgBranch" class="form-input" value="main">
+        </div>
+
+        <div class="form-group">
+          <label for="cfgToken">GitHub Personal Access Token (PAT) <span class="req">*</span></label>
+          <input type="password" id="cfgToken" class="form-input font-mono" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+          <span class="field-hint">Token disimpan aman di <code>localStorage</code> browser laptop Anda sendiri dan tidak pernah dikirim ke pihak ketiga.</span>
+        </div>
+
+        <div id="cfgStatusMsg" class="alert-box" style="display: none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnTestGithubConn" class="btn btn-outline-sm">Uji Koneksi</button>
+        <button id="btnSaveGithubCfg" class="btn btn-primary">Simpan Pengaturan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PANDUAN BUAT TOKEN GITHUB -->
+  <div id="modalGuide" class="modal-backdrop" style="display: none;">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">📖 Cara Membuat GitHub Token (Gratis & Mudah)</h3>
+        <button id="btnCloseGuide" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body modal-scroll">
+        <ol class="guide-steps">
+          <li>Buka <a href="https://github.com/settings/tokens" target="_blank" rel="noopener"><strong>GitHub Personal Access Tokens</strong></a> (Login ke akun GitHub Anda).</li>
+          <li>Klik <strong>Generate new token</strong> &rarr; pilih <strong>Generate new token (classic)</strong>.</li>
+          <li>Pada kolom <strong>Note</strong>, ketik nama bebas, misalnya: <code>Upacara Song Uploader</code>.</li>
+          <li>Pada kolom <strong>Expiration</strong>, pilih masa berlaku (misal: <em>No expiration</em> atau <em>90 days</em>).</li>
+          <li>Centang kotak izin:
+            <ul>
+              <li>✅ <strong><code>repo</code></strong> (Full control of private/public repositories).</li>
+            </ul>
+          </li>
+          <li>Scroll ke bawah dan klik tombol hijau <strong>Generate token</strong>.</li>
+          <li>Salin kode token yang diawali dengan <code>ghp_...</code> lalu tempelkan ke form <strong>Pengaturan GitHub</strong> di portal ini. Selesai!</li>
+        </ol>
+      </div>
+      <div class="modal-footer">
+        <button id="btnCloseGuideBtn" class="btn btn-primary">Tutup Panduan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFIKASI -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
