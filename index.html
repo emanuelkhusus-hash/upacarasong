@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
   <div class="app-layout">
@@ -282,8 +282,53 @@
   </div>
 
   <!-- TOAST NOTIFIKASI -->
+  
+  <!-- MODAL: EDIT INFORMASI LAGU -->
+  <div id="modalEditSong" class="modal-backdrop" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">✏️ Edit Informasi Lagu</h3>
+        <button id="btnCloseEditModal" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editSongId">
+
+        <div class="form-group">
+          <label for="editTitle">Judul Lagu <span class="req">*</span></label>
+          <input type="text" id="editTitle" class="form-input" placeholder="Nama Lagu" required>
+        </div>
+
+        <div class="form-group">
+          <label for="editCategory">Kategori Lagu <span class="req">*</span></label>
+          <select id="editCategory" class="form-select" required>
+            <option value="Upacara Wajib">Upacara Wajib</option>
+            <option value="Lagu Nasional">Lagu Nasional</option>
+            <option value="Hymne & Mars">Hymne & Mars</option>
+            <option value="Pemanasan Vokal">Pemanasan Vokal</option>
+            <option value="Lagu Pilihan">Lagu Pilihan</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="editDesc">Deskripsi / Keterangan Pencipta</label>
+          <textarea id="editDesc" class="form-textarea" rows="2" placeholder="Keterangan singkat lagu"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>File Audio Terkait</label>
+          <input type="text" id="editDirectUrl" class="form-input font-mono" readonly style="background: #F1F5F9; color: #475569;">
+          <span class="field-hint">💡 Mengubah judul di sini tidak mengganti berkas audio fisik, sehingga lagu yang sudah pernah diunduh pengguna di lapangan tetap aman.</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnCancelEdit" class="btn btn-outline-sm">Batal</button>
+        <button id="btnSaveEditSong" class="btn btn-primary">Simpan Perubahan</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=2"></script>
 </body>
 </html>

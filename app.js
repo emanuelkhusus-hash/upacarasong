@@ -328,6 +328,9 @@ function renderCatalog() {
         <button class="btn-icon-action btn-copy-link" data-url="${song.directUrl || ''}" title="Salin URL Direct Audio">
           <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
         </button>
+        <button class="btn-icon-action btn-edit" data-id="${song.id}" title="Edit Judul & Keterangan Lagu">
+          <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+        </button>
         <button class="btn-icon-action btn-del" data-id="${song.id}" title="Hapus dari Katalog">
           <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
         </button>
@@ -348,6 +351,12 @@ function renderCatalog() {
       navigator.clipboard.writeText(finalUrl);
       showToast('✓ Link audio berhasil disalin ke clipboard!');
     });
+
+    // Event edit song
+    const btnEdit = row.querySelector('.btn-edit');
+    if (btnEdit) {
+      btnEdit.addEventListener('click', () => openEditSongModal(song));
+    }
 
     // Event remove song
     const btnDel = row.querySelector('.btn-del');
@@ -753,6 +762,14 @@ function initActions() {
 }
 
 function initModals() {
+  const btnCloseEditModal = document.getElementById('btnCloseEditModal');
+  const btnCancelEdit = document.getElementById('btnCancelEdit');
+  const btnSaveEditSong = document.getElementById('btnSaveEditSong');
+
+  if (btnCloseEditModal) btnCloseEditModal.addEventListener('click', closeEditSongModal);
+  if (btnCancelEdit) btnCancelEdit.addEventListener('click', closeEditSongModal);
+  if (btnSaveEditSong) btnSaveEditSong.addEventListener('click', saveSongEdit);
+
   const modalSettings = document.getElementById('modalSettings');
   const modalGuide = document.getElementById('modalGuide');
 
@@ -841,4 +858,113 @@ function escapeHtml(str) {
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
+}
+
+
+// ==========================================
+// Fasilitas Edit Informasi Lagu
+// ==========================================
+function openEditSongModal(song) {
+  document.getElementById('editSongId').value = song.id;
+  document.getElementById('editTitle').value = song.title || '';
+  document.getElementById('editCategory').value = song.category || 'Lagu Nasional';
+  document.getElementById('editDesc').value = song.description || '';
+  document.getElementById('editDirectUrl').value = song.directUrl || '';
+
+  const modal = document.getElementById('modalEditSong');
+  if (modal) modal.style.display = 'flex';
+}
+
+function closeEditSongModal() {
+  const modal = document.getElementById('modalEditSong');
+  if (modal) modal.style.display = 'none';
+}
+
+async function saveSongEdit() {
+  const songId = document.getElementById('editSongId').value;
+  const newTitle = document.getElementById('editTitle').value.trim();
+  const newCategory = document.getElementById('editCategory').value;
+  const newDesc = document.getElementById('editDesc').value.trim();
+
+  if (!newTitle) {
+    showToast('⚠️ Judul lagu tidak boleh kosong!', true);
+    return;
+  }
+
+  const songIndex = state.songs.findIndex(s => s.id === songId);
+  if (songIndex === -1) return;
+
+  const btnSave = document.getElementById('btnSaveEditSong');
+  if (btnSave) {
+    btnSave.disabled = true;
+    btnSave.textContent = 'Menyimpan...';
+  }
+
+  // Update data lagu di memory lokal
+  state.songs[songIndex].title = newTitle;
+  state.songs[songIndex].category = newCategory;
+  state.songs[songIndex].description = newDesc;
+
+  // Jika terhubung ke GitHub API, sinkronkan ke repository GitHub
+  const { owner, repo, branch, token } = state.gitConfig;
+  if (token && owner && repo) {
+    try {
+      const getCatalogRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/songs.json?ref=${branch}&nocache=${Date.now()}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (getCatalogRes.ok) {
+        const catalogData = await getCatalogRes.json();
+        const catalogSha = catalogData.sha;
+        const decodedContent = decodeGitHubBase64(catalogData.content);
+        const catalogJson = JSON.parse(decodedContent);
+
+        // Update item yang cocok di GitHub songs.json
+        const ghIndex = (catalogJson.songs || []).findIndex(s => s.id === songId);
+        if (ghIndex !== -1) {
+          catalogJson.songs[ghIndex].title = newTitle;
+          catalogJson.songs[ghIndex].category = newCategory;
+          catalogJson.songs[ghIndex].description = newDesc;
+        }
+
+        const updatedJsonString = JSON.stringify(catalogJson, null, 2);
+        const base64Catalog = encodeGitHubBase64(updatedJsonString);
+
+        const putRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/songs.json`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/vnd.github.v3+json'
+          },
+          body: JSON.stringify({
+            message: `edit: ubah judul lagu "${newTitle}" via Upacara Song Portal`,
+            content: base64Catalog,
+            branch: branch,
+            sha: catalogSha
+          })
+        });
+
+        if (!putRes.ok) {
+          const errData = await putRes.json();
+          throw new Error(errData.message || 'Gagal menyimpan ke GitHub');
+        }
+
+        showToast(`✓ Berhasil! Judul lagu diperbarui menjadi "${newTitle}" dan disinkronkan ke GitHub.`);
+      }
+    } catch (err) {
+      console.warn('Gagal sinkron edit ke GitHub:', err);
+      showToast(`⚠️ Judul diperbarui di tampilan lokal, namun gagal sinkron ke GitHub: ${err.message}`, true);
+    }
+  } else {
+    showToast(`✓ Judul lagu "${newTitle}" berhasil diperbarui di daftar lokal.`);
+  }
+
+  if (btnSave) {
+    btnSave.disabled = false;
+    btnSave.textContent = 'Simpan Perubahan';
+  }
+
+  closeEditSongModal();
+  renderCatalog();
 }
