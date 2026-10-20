@@ -109,6 +109,14 @@
       "directUrl": "audio/rukun_sama_teman_minusone.mp3",
       "isMidi": false,
       "description": "Versi Minus One instrumen pengiring vokal"
+    },
+    {
+      "id": "bangun_pemudi_pemuda_karaoke__mp3",
+      "title": "BANGUN PEMUDI PEMUDA KARAOKE",
+      "category": "Lagu Nasional",
+      "directUrl": "audio/KARAOKE BANGUN PEMUDI PEMUDA.mp3",
+      "isMidi": false,
+      "description": "Lagu pengiring upacara (BANGUN PEMUDI PEMUDA KARAOKE)"
     }
   ],
   "driveFolderUrl": "https://drive.google.com/drive/folders/1VjwxTapFmxaN9l35miBbsbg3EuVYARtN?usp=sharing"
